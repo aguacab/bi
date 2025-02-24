@@ -1,643 +1,517 @@
-```html
-<!DOCTYPE html>
-<html>
-<head>
-<title>Detección de Dispositivo</title>
-<script>
-function getCode() {
-  var isIpad = /iPad/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  var isMac = navigator.platform.startsWith('Mac') && navigator.maxTouchPoints < 2;
-
-  if (isIpad || isMac) {
-    // Código para iPad y Mac
-    return `
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cuestionario Restringido</title>
-    <style>
-        /* Estilos generales */
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(90deg, #ff7eb3, #8b5cf6);
-            color: #fff;
-            text-align: center;
-            overflow: hidden;
-            user-select: none; /* Deshabilitar selección de texto */
-            -webkit-user-select: none; /* Deshabilitar selección de texto en Safari */
-            -ms-user-select: none; /* Deshabilitar selección de texto en IE */
-        }
-
-        header, footer {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px;
-        }
-
-        iframe {
-            width: 100%;
-            height: 80vh;
-            border: none;
-            margin-top: 20px;
-        }
-
-        h1 {
-            margin: 0;
-            padding: 10px;
-        }
-
-        /* Estilos para el contador de acciones no permitidas */
-        #actionCounter {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 16px;
-            z-index: 1000;
-        }
-
-        /* Estilos para el desplegable de formularios */
-        #formSelectorContainer {
-            position: fixed;
-            top: 10px;
-            left: 10px;
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 1000;
-        }
-
-        #formSelector {
-            padding: 5px;
-            font-size: 16px;
-        }
-
-        /* Estilos para el modal de advertencia */
-        #blockModal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 0, 0, 0.9); /* Fondo rojo semitransparente */
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-size: 24px;
-            z-index: 9999; /* Asegurarse de que el modal esté por encima de todo */
-        }
-
-        #blockModal p {
-            margin: 50px 0;
-        }
-
-        /* Media query para ajustar el iframe en pantallas más pequeñas */
-        @media (max-width: 768px) {
-            iframe {
-                height: 70vh; /* Ajusta la altura para pantallas más pequeñas */
-            }
-        }
-    </style>
-</head>
-<body>
-
-<!-- Contador de acciones no permitidas -->
-<div id="actionCounter">Acciones no permitidas: 0</div>
-
-<!-- Desplegable de formularios -->
-<div id="formSelectorContainer">
-    <select id="formSelector">
-        <option value="https://forms.gle/e3RBXoC9EHMAXLKj8">Formulario 1</option>
-        <option value="https://forms.gle/GMQ97kmJe6mfcur78">Formulario 2</option>
-        <option value="https://forms.gle/YGKAfNeWnSoTYdHi9">Formulario 3</option>
-    </select>
-</div>
-
-<!-- Formulario de Google incrustado -->
-<iframe id="googleForm" src="https://forms.gle/GMQ97kmJe6mfcur78" allow="fullscreen"></iframe>
-
-<!-- Modal de advertencia -->
-<div id="blockModal">
-    <p><h1>Has salido de la ventana.</h1></p>
-    <p><h1>Regresa en <span id="timer">8</span> segundos o la prueba se bloqueará.</h1></p>
-</div>
-
-<script>
-    let exitTimer; // Temporizador para el contador
-    let timeLeft = 8; // Tiempo en segundos
-    let isWarningVisible = false;
-    let actionCounter = 0; // Contador de acciones no permitidas
-
-    // Función para registrar acciones no permitidas
-    function logAction() {
-        actionCounter++;
-        document.getElementById('actionCounter').textContent = \`Acciones no permitidas: \${actionCounter}\`;
-        if (actionCounter % 6 === 0) { // Bloquear cada 6 acciones no permitidas
-            window.location.replace('about:blank');
-        }
-    }
-
-    // Monitorear cambios de pestaña o ventana
-    window.addEventListener('visibilitychange', function() {
-        if (document.hidden) { // Si el usuario cambia de pestaña o ventana
-            logAction(); // Registrar acción no permitida
-            showWarning(); // Mostrar advertencia
-        } else { // Si el usuario regresa a la pestaña
-            clearWarning(); // Ocultar advertencia
-        }
-    });
-
-    // Función para mostrar la advertencia y el contador de 8 segundos
-    function showWarning() {
-        if (!isWarningVisible) {
-            isWarningVisible = true;
-            document.getElementById('blockModal').style.display = 'block';
-            exitTimer = setInterval(function() {
-                if (timeLeft > 0) {
-                    timeLeft--;
-                    document.getElementById('timer').textContent = timeLeft;
-                    document.title = \`Regresa en \${timeLeft} segundos\`;
-                } else {
-                    clearInterval(exitTimer);
-                    window.location.replace('about:blank'); // Redirigir a una ventana en blanco
-                }
-            }, 1000);
-        }
-    }
-
-    // Función para ocultar la advertencia y reiniciar el contador
-    function clearWarning() {
-        if (isWarningVisible) {
-            isWarningVisible = false;
-            clearInterval(exitTimer);
-            timeLeft = 8;
-            document.getElementById('timer').textContent = timeLeft;
-            document.getElementById('blockModal').style.display = 'none';
-            document.title = 'Cuestionario Restringido';
-        }
-    }
-
-    // Cambiar el formulario según la selección del usuario
-    document.getElementById('formSelector').addEventListener('change', function() {
-        const selectedForm = this.value;
-        document.getElementById('googleForm').src = selectedForm;
-    });
-
-    // Prevenir salir de la página
-    window.addEventListener("beforeunload", function(event) {
-        event.preventDefault();
-        event.returnValue = ""; // Mostrar cuadro de diálogo de confirmación
-    });
-
-     // Prevenir el uso de teclas no permitidas
-    document.addEventListener('keydown', function(event) {
-        const forbiddenKeys = ['F11', 'Escape', 'PrintScreen'];
-        if (forbiddenKeys.includes(event.key) || (event.ctrlKey && ['c', 'u', 's', 'p', 'a'].includes(event.key))) {
-            event.preventDefault();
-            logAction(); // Registrar acción no permitida
-        }
-    });
-
-    // Prevenir clic derecho
-    document.addEventListener('contextmenu', function(event) {
-        event.preventDefault();
-        logAction(); // Registrar acción no permitida
-    });
-
-    // Función para detectar si es un ordenador
-    function isDesktop() {
-        return (typeof window.orientation === "undefined") || (navigator.userAgent.indexOf('IEMobile') === -1);
-    }
-
-    // Función para pantalla completa
-    function fullScreen() {
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen();
-        } else if (document.documentElement.mozRequestFullScreen) { /* Firefox */
-            document.documentElement.mozRequestFullScreen();
-        } else if (document.documentElement.webkitRequestFullscreen) { /* Chrome, Safari & Opera */
-            document.documentElement.webkitRequestFullscreen();
-        } else if (document.documentElement.msRequestFullscreen) { /* IE/Edge */
-            document.documentElement.msRequestFullscreen();
-        }
-    }
-
-    // Pantalla completa solo en ordenadores
-    if (isDesktop()) {
-        fullScreen();
-    }
-
-</script>
-
-<footer>
-    <p>No se permite tener otras pestañas o ventanas, ni realizar capturas ni salir de la pantalla de la prueba. Cualquier incumplimiento será registrado.</p>
-</footer>
-
-</body>
-</html>
-    `;
-  } else {
-    // Código para otros dispositivos
-    return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cuestionario Restringido</title>
-    <style>
-        /* Estilos generales */
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(90deg, #ff7eb3, #8b5cf6);
-            color: #fff;
-            text-align: center;
-            overflow: hidden;
-            user-select: none; /* Deshabilitar selección de texto */
-            -webkit-user-select: none; /* Deshabilitar selección de texto en Safari */
-            -ms-user-select: none; /* Deshabilitar selección de texto en IE */
+    <script>
+        // Función para detectar si el usuario está en un iPad o Mac
+        function esiPadOMac() {
+            const userAgent = navigator.userAgent;
+            return /iPad|Macintosh/i.test(userAgent) && !/iPhone/i.test(userAgent);
         }
 
-        header, footer {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 10px;
-        }
+        // Cargar el código correspondiente según el dispositivo
+        function cargarCodigo() {
+            if (esiPadOMac()) {
+                // Cargar el código para iPad/Mac
+                document.body.innerHTML = `
+                    <!-- Código para iPad/Mac -->
+                    <style>
+                        /* Estilos generales */
+                        body {
+                            margin: 0;
+                            font-family: Arial, sans-serif;
+                            background: linear-gradient(90deg, #ff7eb3, #8b5cf6);
+                            color: #fff;
+                            text-align: center;
+                            overflow: hidden;
+                            user-select: none;
+                            -webkit-user-select: none;
+                            -ms-user-select: none;
+                        }
 
-        iframe {
-            width: 100%;
-            height: 80vh;
-            border: none;
-            margin-top: 20px;
-        }
+                        header, footer {
+                            background: rgba(0, 0, 0, 0.8);
+                            padding: 10px;
+                        }
 
-        h1 {
-            margin: 0;
-            padding: 10px;
-        }
+                        iframe {
+                            width: 100%;
+                            height: 80vh;
+                            border: none;
+                            margin-top: 20px;
+                        }
 
-        .alert {
-            font-size: 1rem;
-            color: red;
-        }
+                        h1 {
+                            margin: 0;
+                            padding: 10px;
+                        }
 
-        /* Estilos para el modal */
-        #blockModal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 0, 0, 0.9); /* Fondo rojo semitransparente */
-            color: white;
-            text-align: center;
-            padding: 20px;
-            font-size: 24px;
-            z-index: 9999; /* Asegurarse de que el modal esté por encima de todo */
-        }
+                        /* Estilos para el contador de acciones no permitidas */
+                        #actionCounter {
+                            position: fixed;
+                            top: 10px;
+                            right: 10px;
+                            background: rgba(0, 0, 0, 0.8);
+                            padding: 10px;
+                            border-radius: 5px;
+                            font-size: 16px;
+                            z-index: 1000;
+                        }
 
-        #blockModal p {
-            margin: 50px 0;
-        }
+                        /* Estilos para el desplegable de formularios */
+                        #formSelectorContainer {
+                            position: fixed;
+                            top: 10px;
+                            left: 10px;
+                            background: rgba(0, 0, 0, 0.8);
+                            padding: 10px;
+                            border-radius: 5px;
+                            z-index: 1000;
+                        }
 
-        /* Estilos para hacer ilegibles las capturas de pantalla */
-        .blurred {
-            filter: blur(10px);
-        }
+                        #formSelector {
+                            padding: 5px;
+                            font-size: 16px;
+                        }
 
-        /* Deshabilitar selección de imágenes */
-        img {
-            pointer-events: none;
-        }
+                        /* Estilos para el modal de advertencia */
+                        #blockModal {
+                            display: none;
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background-color: rgba(255, 0, 0, 0.9);
+                            color: white;
+                            text-align: center;
+                            padding: 20px;
+                            font-size: 24px;
+                            z-index: 9999;
+                        }
 
-        /* Estilos para el botón de pantalla completa */
-        #fullScreenBtn {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 50%; /* Ocupa el 50% del ancho de la pantalla */
-            height: 100%; /* Ocupa todo el alto de la pantalla */
-            padding: 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 24px;
-            z-index: 1000;
-            transition: opacity 0.5s ease;
-        }
+                        #blockModal p {
+                            margin: 50px 0;
+                        }
 
-        #fullScreenBtn:hover {
-            background-color: #0056b3;
-        }
+                        /* Media query para ajustar el iframe en pantallas más pequeñas */
+                        @media (max-width: 768px) {
+                            iframe {
+                                height: 70vh;
+                            }
+                        }
+                    </style>
+                    <div id="actionCounter">Acciones no permitidas: 0</div>
+                    <div id="formSelectorContainer">
+                        <select id="formSelector">
+                            <option value="https://forms.gle/e3RBXoC9EHMAXLKj8">Formulario 1</option>
+                            <option value="https://forms.gle/GMQ97kmJe6mfcur78">Formulario 2</option>
+                            <option value="https://forms.gle/YGKAfNeWnSoTYdHi9">Formulario 3</option>
+                        </select>
+                    </div>
+                    <iframe id="googleForm" src="https://forms.gle/GMQ97kmJe6mfcur78" allow="fullscreen"></iframe>
+                    <div id="blockModal">
+                        <p><h1>Has salido de la ventana.</h1></p>
+                        <p><h1>Regresa en <span id="timer">8</span> segundos o la prueba se bloqueará.</h1></p>
+                    </div>
+                    <footer>
+                        <p>No se permite tener otras pestañas o ventanas, ni realizar capturas ni salir de la pantalla de la prueba. Cualquier incumplimiento será registrado.</p>
+                    </footer>
+                    <script>
+                        let exitTimer;
+                        let timeLeft = 8;
+                        let isWarningVisible = false;
+                        let actionCounter = 0;
 
-        /* Estilos para el botón que aparece en pantalla completa */
-        #extraBtn {
-            display: none;
-            position: fixed;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 10px 20px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 18px;
-            z-index: 1000;
-        }
+                        function logAction() {
+                            actionCounter++;
+                            document.getElementById('actionCounter').textContent = `Acciones no permitidas: ${actionCounter}`;
+                            if (actionCounter % 6 === 0) {
+                                window.location.replace('about:blank');
+                            }
+                        }
 
-        #extraBtn:hover {
-            background-color: #218838;
-        }
+                        window.addEventListener('visibilitychange', function() {
+                            if (document.hidden) {
+                                logAction();
+                                showWarning();
+                            } else {
+                                clearWarning();
+                            }
+                        });
 
-        /* Estilos para el botón que aparece al salir de pantalla completa */
-        #exitFullScreenBtn {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 80%; /* Ocupa el 80% del ancho de la pantalla */
-            height: 100%; /* Ocupa todo el alto de la pantalla */
-            padding: 20px;
-            background-color: #dc3545;
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 24px;
-            z-index: 1000;
-            transition: opacity 0.5s ease;
-        }
+                        function showWarning() {
+                            if (!isWarningVisible) {
+                                isWarningVisible = true;
+                                document.getElementById('blockModal').style.display = 'block';
+                                exitTimer = setInterval(function() {
+                                    if (timeLeft > 0) {
+                                        timeLeft--;
+                                        document.getElementById('timer').textContent = timeLeft;
+                                        document.title = `Regresa en ${timeLeft} segundos`;
+                                    } else {
+                                        clearInterval(exitTimer);
+                                        window.location.replace('about:blank');
+                                    }
+                                }, 1000);
+                            }
+                        }
 
-        #exitFullScreenBtn:hover {
-            background-color: #c82333;
-        }
+                        function clearWarning() {
+                            if (isWarningVisible) {
+                                isWarningVisible = false;
+                                clearInterval(exitTimer);
+                                timeLeft = 8;
+                                document.getElementById('timer').textContent = timeLeft;
+                                document.getElementById('blockModal').style.display = 'none';
+                                document.title = 'Cuestionario Restringido';
+                            }
+                        }
 
-        /* Estilos para el contador de acciones no permitidas */
-        #actionCounter {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 1000;
-        }
+                        document.getElementById('formSelector').addEventListener('change', function() {
+                            const selectedForm = this.value;
+                            document.getElementById('googleForm').src = selectedForm;
+                        });
 
-        /* Estilos para el menú de selección de formularios */
-        #formSelectorContainer {
-            margin: 20px;
-        }
-    </style>
-</head>
-<body>
+                        window.addEventListener("beforeunload", function(event) {
+                            event.preventDefault();
+                            event.returnValue = "";
+                        });
 
-<!-- Botón para activar el modo pantalla completa -->
-<button id="fullScreenBtn">Comenzar</button>
+                        document.addEventListener('keydown', function(event) {
+                            const forbiddenKeys = ['F11', 'Escape', 'PrintScreen'];
+                            if (forbiddenKeys.includes(event.key) || (event.ctrlKey && ['c', 'u', 's', 'p', 'a'].includes(event.key))) {
+                                event.preventDefault();
+                                logAction();
+                            }
+                        });
 
-<!-- Botón que aparece en pantalla completa -->
-<button id="extraBtn">No salgas de la pantalla</button>
+                        document.addEventListener('contextmenu', function(event) {
+                            event.preventDefault();
+                            logAction();
+                        });
 
-<!-- Botón que aparece al salir de pantalla completa -->
-<button id="exitFullScreenBtn">Has salido de la Pantalla Completa</button>
+                        function isDesktop() {
+                            return (typeof window.orientation === "undefined") || (navigator.userAgent.indexOf('IEMobile') === -1);
+                        }
 
-<!-- Contador de acciones no permitidas -->
-<div id="actionCounter">Acciones no permitidas: 0</div>
+                        function fullScreen() {
+                            if (document.documentElement.requestFullscreen) {
+                                document.documentElement.requestFullscreen();
+                            } else if (document.documentElement.mozRequestFullScreen) {
+                                document.documentElement.mozRequestFullScreen();
+                            } else if (document.documentElement.webkitRequestFullscreen) {
+                                document.documentElement.webkitRequestFullscreen();
+                            } else if (document.documentElement.msRequestFullscreen) {
+                                document.documentElement.msRequestFullscreen();
+                            }
+                        }
 
-<!-- Contenedor del menú de selección de formularios -->
-<div id="formSelectorContainer">
-    <select id="formSelector">
-        <option value="https://docs.google.com/forms/d/e/1FAIpQLSc2_n9wCXBYSRB5A6eZS7oIrDV9Tt5iQUeS-s2NO4qx7dknTA/viewform?usp=sf_link">Formulario 1</option>
-        <option value="https://docs.google.com/forms/d/e/1FAIpQLSfUZhyGmJrT3pf79K6TDjPayq3M5MVrERisE2aSgJFA7vRulA/viewform?usp=header">Formulario 2</option>
-        <option value="https://forms.gle/Bmcm5vtANv4Nz2ZA6">Formulario 3</option>
-        <option value="https://forms.gle/rvPhcJ6rHw4pi1F18">Formulario 4</option>
-        <!-- Agrega más opciones según sea necesario -->
-    </select>
-    <button id="acceptBtn">Aceptar</button>
-</div>
+                        if (isDesktop()) {
+                            fullScreen();
+                        }
+                    </script>
+                `;
+            } else {
+                // Cargar el código para otros dispositivos
+                document.body.innerHTML = `
+                    <!-- Código para otros dispositivos -->
+                    <style>
+                        /* Estilos generales */
+                        body {
+                            margin: 0;
+                            font-family: Arial, sans-serif;
+                            background: linear-gradient(90deg, #ff7eb3, #8b5cf6);
+                            color: #fff;
+                            text-align: center;
+                            overflow: hidden;
+                            user-select: none;
+                            -webkit-user-select: none;
+                            -ms-user-select: none;
+                        }
 
-<!-- Formulario de Google incrustado -->
-<iframe id="googleForm" src="https://forms.gle/rvPhcJ6rHw4pi1F18" allow="fullscreen"></iframe>
+                        header, footer {
+                            background: rgba(0, 0, 0, 0.8);
+                            padding: 10px;
+                        }
 
-<!-- Modal de advertencia -->
-<div id="blockModal">
-    <p><h1>Has salido de la ventana.</h1></p>
-    <p><h1>Regresa en <span id="timer">8</span> segundos o la prueba se bloqueará.</h1></p>
-    <p>Acción no permitida registrada</p>
-</div>
+                        iframe {
+                            width: 100%;
+                            height: 80vh;
+                            border: none;
+                            margin-top: 20px;
+                        }
 
-<script>
-    let exitTimer; // Temporizador para el contador
-    let timeLeft = 8; // Tiempo en segundos
-    let isWarningVisible = false;
+                        h1 {
+                            margin: 0;
+                            padding: 10px;
+                        }
 
-    // Obtener el contador y la marca de tiempo desde localStorage
-    let actionCounter = parseInt(localStorage.getItem('actionCounter')) || 0;
-    let lastTimestamp = parseInt(localStorage.getItem('lastTimestamp')) || Date.now();
+                        .alert {
+                            font-size: 1rem;
+                            color: red;
+                        }
 
-    // Verificar si el ordenador se ha reiniciado
-    if (Date.now() - lastTimestamp > 86400000) { // 86400000 ms = 24 horas
-        actionCounter = 0;
-        localStorage.setItem('actionCounter', actionCounter);
-    }
+                        /* Estilos para el modal de advertencia */
+                        #blockModal {
+                            display: none;
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            background-color: rgba(255, 0, 0, 0.9);
+                            color: white;
+                            text-align: center;
+                            padding: 20px;
+                            font-size: 24px;
+                            z-index: 9999;
+                        }
 
-    // Actualizar la marca de tiempo en localStorage
-    localStorage.setItem('lastTimestamp', Date.now());
+                        #blockModal p {
+                            margin: 50px 0;
+                        }
 
-    // Actualizar el contador de acciones no permitidas
-    function updateActionCounter() {
-        actionCounter++;
-        localStorage.setItem('actionCounter', actionCounter);
-        document.getElementById('actionCounter').textContent = \`Acciones no permitidas: \${actionCounter}\`;
-        if (actionCounter % 6 === 0) { // Bloquear cada múltiplo de 6
-            window.location.replace('about:blank');
-        }
-    }
+                        /* Estilos para hacer ilegibles las capturas de pantalla */
+                        .blurred {
+                            filter: blur(10px);
+                        }
 
-    // Función para manejar eventos de teclado
-    function handleKeydown(e) {
-        const forbiddenKeys = ['F11', 'Escape', 'Backspace', 'PrintScreen'];
-        if (forbiddenKeys.includes(e.key) || (e.ctrlKey && ['c', 'u', 's', 'p', 'a', '+', '-', '0'].includes(e.key))) {
-            e.preventDefault();
-            updateActionCounter();
-        }
-    }
+                        /* Deshabilitar selección de imágenes */
+                        img {
+                            pointer-events: none;
+                        }
 
-    // Deshabilitar clic derecho
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-        updateActionCounter();
-    });
+                        /* Estilos para el botón de pantalla completa */
+                        #fullScreenBtn {
+                            position: fixed;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            width: 50%;
+                            height: 100%;
+                            padding: 20px;
+                            background-color: #007bff;
+                            color: white;
+                            border: none;
+                            cursor: pointer;
+                            font-size: 24px;
+                            z-index: 1000;
+                            transition: opacity 0.5s ease;
+                        }
+                        #fullScreenBtn:hover {
+                            background-color: #0056b3;
+                        }
 
-    // Manejar eventos de teclado
-    document.addEventListener('keydown', handleKeydown);
+                        /* Estilos para el botón que aparece en pantalla completa */
+                        #extraBtn {
+                            display: none;
+                            position: fixed;
+                            bottom: 10px;
+                            left: 50%;
+                            transform: translateX(-50%);
+                            padding: 10px 20px;
+                            background-color: #28a745;
+                            color: white;
+                            border: none;
+                            cursor: pointer;
+                            font-size: 18px;
+                            z-index: 1000;
+                        }
+                        #extraBtn:hover {
+                            background-color: #218838;
+                        }
 
-    // Prevenir salir de la pantalla principal
-    window.addEventListener('visibilitychange', function() {
-        if (document.hidden) {
-            updateActionCounter(); // Incrementar el contador al cambiar de pestaña
-            if (!isWarningVisible) {
-                isWarningVisible = true;
-                document.getElementById('blockModal').style.display = 'block';
-                exitTimer = setInterval(function() {
-                    if (timeLeft > 0) {
-                        timeLeft--;
-                        document.getElementById('timer').textContent = timeLeft;
-                        document.title = \`Regresa en \${timeLeft} segundos\`;
-                    } else {
-                        clearInterval(exitTimer);
-                        alert('La prueba se ha bloqueado.');
-                        // Redirigir al usuario a una página en blanco
-                        window.location.replace('about:blank');
-                    }
-                }, 1000);
-            }
-        } else {
-            if (isWarningVisible) {
-                isWarningVisible = false;
-                clearInterval(exitTimer);
-                timeLeft = 8;
-                document.getElementById('timer').textContent = timeLeft;
-                document.getElementById('blockModal').style.display = 'none';
-                document.title = 'Cuestionario Restringido';
-            }
-        }
-    });
+                        /* Estilos para el botón que aparece al salir de pantalla completa */
+                        #exitFullScreenBtn {
+                            display: none;
+                            position: fixed;
+                            top: 50%;
+                            left: 50%;
+                            transform: translate(-50%, -50%);
+                            width: 80%;
+                            height: 100%;
+                            padding: 20px;
+                            background-color: #dc3545;
+                            color: white;
+                            border: none;
+                            cursor: pointer;
+                            font-size: 24px;
+                            z-index: 1000;
+                            transition: opacity 0.5s ease;
+                        }
+                        #exitFullScreenBtn:hover {
+                            background-color: #c82333;
+                        }
 
-    // Hacer ilegibles las capturas de pantalla
-    document.addEventListener('visibilitychange', function() {
-        if (document.hidden) {
-            document.body.classList.add('blurred');
-        } else {
-            document.body.classList.remove('blurred');
-        }
-    });
+                        /* Estilos para el contador de acciones no permitidas */
+                        #actionCounter {
+                            position: fixed;
+                            top: 10px;
+                            right: 10px;
+                            background-color: rgba(0, 0, 0, 0.7);
+                            color: white;
+                            padding: 10px;
+                            border-radius: 5px;
+                            z-index: 1000;
+                        }
 
-    // Deshabilitar el zoom
-    document.addEventListener('wheel', function(e) {
-        if (e.ctrlKey) {
-            e.preventDefault();
-            updateActionCounter();
-        }
-    }, { passive: false });
+                        /* Estilos para el menú de selección de formularios */
+                        #formSelectorContainer {
+                            margin: 20px;
+                        }
+                    </style>
+                    <button id="fullScreenBtn">Comenzar</button>
+                    <button id="extraBtn">No salgas de la pantalla</button>
+                    <button id="exitFullScreenBtn">Has salido de la Pantalla Completa</button>
+                    <div id="actionCounter">Acciones no permitidas: 0</div>
+                    <div id="formSelectorContainer">
+                        <select id="formSelector">
+                            <option value="https://docs.google.com/forms/d/e/1FAIpQLSc2_n9wCXBYSRB5A6eZS7oIrDV9Tt5iQUeS-s2NO4qx7dknTA/viewform?usp=sf_link">Formulario 1</option>
+                            <option value="https://docs.google.com/forms/d/e/1FAIpQLSfUZhyGmJrT3pf79K6TDjPayq3M5MVrERisE2aSgJFA7vRulA/viewform?usp=header">Formulario 2</option>
+                            <option value="https://forms.gle/Bmcm5vtANv4Nz2ZA6">Formulario 3</option>
+                            <option value="https://forms.gle/rvPhcJ6rHw4pi1F18">Formulario 4</option>
+                        </select>
+                        <button id="acceptBtn">Aceptar</button>
+                    </div>
+                    <iframe id="googleForm" src="https://forms.gle/rvPhcJ6rHw4pi1F18" allow="fullscreen"></iframe>
+                    <div id="blockModal">
+                        <p><h1>Has salido de la ventana.</h1></p>
+                        <p><h1>Regresa en <span id="timer">8</span> segundos o la prueba se bloqueará.</h1></p>
+                        <p>Acción no permitida registrada</p>
+                    </div>
+                    <footer>
+                        <p>No se permite tener otras pestañas o ventanas, ni realizar capturas ni salir de la pantalla de la prueba. Cualquier incumplimiento conlleva la anulación de la prueba.</p>
+                    </footer>
+                    <script>
+                        let exitTimer;
+                        let timeLeft = 8;
+                        let isWarningVisible = false;
+                        let actionCounter = parseInt(localStorage.getItem('actionCounter')) || 0;
+                        let lastTimestamp = parseInt(localStorage.getItem('lastTimestamp')) || Date.now();
 
-    // Deshabilitar gestos multitáctiles
-    document.addEventListener('touchmove', function(e) {
-        if (e.touches.length > 1) {
-            e.preventDefault();
-            updateActionCounter();
-        }
-    }, { passive: false });
+                        if (Date.now() - lastTimestamp > 86400000) {
+                            actionCounter = 0;
+                            localStorage.setItem('actionCounter', actionCounter);
+                        }
 
-    // Mostrar advertencia al intentar salir de la página
-    window.addEventListener("beforeunload", function (event) {
-        event.preventDefault();
-        event.returnValue = ""; // Esto activa el cuadro de diálogo del navegador
-        updateActionCounter();
-    });
+                        localStorage.setItem('lastTimestamp', Date.now());
 
-    // Evitar el botón "Atrás" del navegador
-    history.replaceState(null, "", location.href);
-    window.addEventListener("popstate", function () {
-        history.replaceState(null, "", location.href);
-        alert("No puedes volver atrás en esta página.");
-        updateActionCounter();
-    });
+                        function updateActionCounter() {
+                            actionCounter++;
+                            localStorage.setItem('actionCounter', actionCounter);
+                            document.getElementById('actionCounter').textContent = `Acciones no permitidas: ${actionCounter}`;
+                            if (actionCounter % 6 === 0) {
+                                window.location.replace('about:blank');
+                            }
+                        }
 
-    // Activar modo pantalla completa automáticamente al cargar la página
-    document.addEventListener("DOMContentLoaded", function() {
-        function requestFullScreen() {
-            if (document.documentElement.requestFullscreen) {
-                document.documentElement.requestFullscreen();
-            } else if (document.documentElement.webkitRequestFullscreen) {
-                document.documentElement.webkitRequestFullscreen();
-            } else if (document.documentElement.msRequestFullscreen) {
-                document.documentElement.msRequestFullscreen();
-            } else if (document.documentElement.mozRequestFullScreen) { // Firefox
-                document.documentElement.mozRequestFullScreen();
-            }
-        }
+                        function handleKeydown(e) {
+                            const forbiddenKeys = ['F11', 'Escape', 'Backspace', 'PrintScreen'];
+                            if (forbiddenKeys.includes(e.key) || (e.ctrlKey && ['c', 'u', 's', 'p', 'a', '+', '-', '0'].includes(e.key))) {
+                                e.preventDefault();
+                                updateActionCounter();
+                            }
+                        }
 
-        // Intentar activar pantalla completa inmediatamente
-        requestFullScreen();
+                        document.addEventListener('contextmenu', function(e) {
+                            e.preventDefault();
+                            updateActionCounter();
+                        });
 
-        // Intentar activar pantalla completa al primer clic/tap si no se activó antes
-        document.addEventListener('click', requestFullScreen);
-        document.addEventListener('touchstart', requestFullScreen);
-    });
+                        document.addEventListener('keydown', handleKeydown);
 
-    // Mostrar el botón extra cuando la pantalla esté en modo pantalla completa
-    document.addEventListener('fullscreenchange', function() {
-        const extraBtn = document.getElementById('extraBtn');
-        const exitFullScreenBtn = document.getElementById('exitFullScreenBtn');
-        if (document.fullscreenElement) {
-            extraBtn.style.display = 'block';
-            exitFullScreenBtn.style.display = 'none';
-        } else {
-            extraBtn.style.display = 'none';
-            exitFullScreenBtn.style.display = 'block';
-            updateActionCounter(); // Incrementar el contador al salir de pantalla completa
-        }
-    });
+                        window.addEventListener('visibilitychange', function() {
+                            if (document.hidden) {
+                                updateActionCounter();
+                                if (!isWarningVisible) {
+                                    isWarningVisible = true;
+                                    document.getElementById('blockModal').style.display = 'block';
+                                    exitTimer = setInterval(function() {
+                                        if (timeLeft > 0) {
+                                            timeLeft--;
+                                            document.getElementById('timer').textContent = timeLeft;
+                                            document.title = `Regresa en ${timeLeft} segundos`;
+                                        } else {
+                                            clearInterval(exitTimer);
+                                            alert('La prueba se ha bloqueado.');
+                                            window.location.replace('about:blank');
+                                        }
+                                    }, 1000);
+                                }
+                            } else {
+                                if (isWarningVisible) {
+                                    isWarningVisible = false;
+                                    clearInterval(exitTimer);
+                                    timeLeft = 8;
+                                    document.getElementById('timer').textContent = timeLeft;
+                                    document.getElementById('blockModal').style.display = 'none';
+                                    document.title = 'Cuestionario Restringido';
+                                }
+                            }
+                        });
 
-    // Preguntar al usuario antes de realizar alguna acción al hacer clic en el botón "Salir de Pantalla Completa"
-    document.addEventListener("DOMContentLoaded", function() {
-        const exitFullScreenBtn = document.getElementById('exitFullScreenBtn');
-        if (exitFullScreenBtn) {
-            exitFullScreenBtn.addEventListener('click', function() {
-                if (confirm("Acción no permitida registrada")) {
-                    updateActionCounter();
-                }
-            });
-        }
-    });
+                        document.addEventListener('visibilitychange', function() {
+                            if (document.hidden) {
+                                document.body.classList.add('blurred');
+                            } else {
+                                document.body.classList.remove('blurred');
+                            }
+                        });
 
-    // Ocultar el botón de pantalla completa al hacer clic en él
-    document.getElementById('fullScreenBtn').addEventListener('click', function() {
-        this.style.opacity = '0';
-        setTimeout(() => {
-            this.style.display = 'none';
-        }, 500); // Esperar a que la transición de opacidad termine
-    });
+                        document.addEventListener('wheel', function(e) {
+                            if (e.ctrlKey) {
+                                e.preventDefault();
+                                updateActionCounter();
+                            }
+                        }, { passive: false });
 
-    // Inicializar el contador de acciones no permitidas desde localStorage
-    document.getElementById('actionCounter').textContent = \`Acciones no permitidas: \${actionCounter}\`;
+                        document.addEventListener('touchmove', function(e) {
+                            if (e.touches.length > 1) {
+                                e.preventDefault();
+                                updateActionCounter();
+                            }
+                        }, { passive: false });
 
-    // Cambiar el formulario de Google según la selección del usuario y ocultar el menú
-    document.getElementById('acceptBtn').addEventListener('click', function() {
-        const selectedForm = document.getElementById('formSelector').value;
-        document.getElementById('googleForm').src = selectedForm;
-        document.getElementById('formSelectorContainer').style.display = 'none';
-    });
-</script>
+                        window.addEventListener("beforeunload", function(event) {
+                            event.preventDefault();
+                            event.returnValue = "";
+                            updateActionCounter();
+                        });
 
-<footer>
-    <p>No se permite tener otras pestañas o ventanas, ni realizar capturas ni salir de la pantalla de la prueba. Cualquier incumplimiento conlleva la anulación de la prueba.</p>
-</footer>
+                        history.replaceState(null, "", location.href);
+                        window.addEventListener("popstate", function() {
+                            history.replaceState(null, "", location.href);
+                            alert("No puedes volver atrás en esta página.");
+                            updateActionCounter();
+                        });
 
-</body>
-</html>
-    `;
-  }
-}
+                        document.addEventListener("DOMContentLoaded", function() {
+                            function requestFullScreen() {
+                                if (document.documentElement.requestFullscreen) {
+                                    document.documentElement.requestFullscreen();
+                                } else if (document.documentElement.webkitRequestFullscreen) {
+                                    document.documentElement.webkitRequestFullscreen();
+                                } else if (document.documentElement.msRequestFullscreen) {
+                                    document.documentElement.msRequestFullscreen();
+                                } else if (document.documentElement.mozRequestFullScreen) {
+                                    document.documentElement.mozRequestFullScreen();
+                                }
+                            }
 
-function displayCode() {
-  var code = getCode();
-  document.getElementById("content").innerHTML = code;
-}
-</script>
-</head>
-<body onload="displayCode()">
-<div id="content">
-</div>
-</body>
-</html>
+                            requestFullScreen();
+
+                            document.addEventListener('click', requestFullScreen);
+                            document.addEventListener('touchstart', requestFullScreen);
+                        });
+
+                        document.addEventListener('fullscreenchange', function() {
+                            const extraBtn = document.getElementById('extraBtn');
+                            const exitFullScreenBtn = document.getElementById('exitFullScreenBtn');
+                            if (document.fullscreenElement) {
+                                extraBtn.style.display = 'block';
+                                exitFullScreenBtn.style.display = 'none';
+                            } else {
+                                extra

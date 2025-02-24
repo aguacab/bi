@@ -8,22 +8,23 @@
         // Función para detectar si el usuario está en un iPad o Mac
         function esiPadOMac() {
             const userAgent = navigator.userAgent;
+            console.log("User Agent:", userAgent); // Mostrar el userAgent en la consola
             return /iPad|Macintosh/i.test(userAgent) && !/iPhone/i.test(userAgent);
         }
 
-        // Función para abrir la interfaz correspondiente en una nueva pestaña
-        function abrirInterfaz() {
+        // Función para redirigir a la interfaz correspondiente
+        function redirigir() {
             if (esiPadOMac()) {
-                // Abrir la interfaz para iPad/Mac en una nueva pestaña
-                window.open("https://aguacab.github.io/ipad2/", "_blank");
+                console.log("Dispositivo detectado: iPad o Mac"); // Mensaje de depuración
+                window.location.href = "https://aguacab.github.io/ipad2/"; // Redirigir a la interfaz para iPad/Mac
             } else {
-                // Abrir la interfaz para otros dispositivos en una nueva pestaña
-                window.open("https://aguacab.github.io/3fyq1/", "_blank");
+                console.log("Dispositivo detectado: Otro dispositivo"); // Mensaje de depuración
+                window.location.href = "https://aguacab.github.io/3fyq1/"; // Redirigir a la interfaz para otros dispositivos
             }
         }
 
-        // Ejecutar la detección y abrir la interfaz correspondiente
-        window.onload = abrirInterfaz;
+        // Ejecutar la detección y redirigir
+        window.onload = redirigir;
     </script>
 </head>
 <body>

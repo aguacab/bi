@@ -514,4 +514,34 @@
                                 extraBtn.style.display = 'block';
                                 exitFullScreenBtn.style.display = 'none';
                             } else {
-                                extra
+                                extraBtn.style.display = 'none';
+                                exitFullScreenBtn.style.display = 'block';
+                                updateActionCounter();
+                            }
+                        });
+
+                        document.getElementById('fullScreenBtn').addEventListener('click', function() {
+                            this.style.opacity = '0';
+                            setTimeout(() => {
+                                this.style.display = 'none';
+                            }, 500);
+                        });
+
+                        document.getElementById('acceptBtn').addEventListener('click', function() {
+                            const selectedForm = document.getElementById('formSelector').value;
+                            document.getElementById('googleForm').src = selectedForm;
+                            document.getElementById('formSelectorContainer').style.display = 'none';
+                        });
+                    </script>
+                `;
+            }
+        }
+
+        // Cargar el código cuando la página esté lista
+        window.onload = cargarCodigo;
+    </script>
+</head>
+<body>
+    <!-- El contenido se cargará dinámicamente -->
+</body>
+</html>
